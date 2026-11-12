@@ -289,10 +289,14 @@ export default function App() {
                   ? 'Fechar envelope da mensagem'
                   : 'Abrir envelope para ler a mensagem'
               }
-              className="relative w-[84%] max-w-[330px] cursor-pointer outline-none focus:outline-none focus-visible:ring-2 focus-visible:ring-[#7D93AA]/60 focus-visible:ring-offset-4 rounded-sm transition-transform duration-200 hover:-translate-y-0.5 active:scale-[0.99]"
+              className="relative w-[84%] max-w-[330px] cursor-pointer outline-none focus:outline-none focus-visible:outline-none [-webkit-tap-highlight-color:transparent] select-none transition-transform duration-200 hover:-translate-y-0.5 active:scale-[0.99]"
             >
               <BlueGoldEnvelope isOpen={envelopeOpen} className="w-full" />
             </button>
+
+            <p className="mt-4 text-[11px] tracking-[0.22em] uppercase text-[#5D738A] text-center select-none">
+              {envelopeOpen ? 'Clique no envelope para fechar' : 'Clique no envelope para abrir'}
+            </p>
           </motion.section>
 
           {/* 3. COUPLE PHOTOGRAPH (ORIGINAL DIMENSIONS) */}
@@ -357,7 +361,7 @@ export default function App() {
                 alt=""
                 aria-hidden="true"
                 referrerPolicy="no-referrer"
-                className="pointer-events-none select-none absolute -bottom-7 -right-10 w-[124px] sm:w-[134px] z-20 drop-shadow-[0_6px_14px_rgba(61,81,102,0.14)]"
+                className="pointer-events-none select-none absolute -bottom-9 -right-11 w-[108px] sm:w-[116px] z-20 drop-shadow-[0_6px_14px_rgba(61,81,102,0.14)]"
               />
             </div>
           </motion.section>

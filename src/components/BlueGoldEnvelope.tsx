@@ -14,18 +14,18 @@ export function BlueGoldEnvelope({
 
   const springTransition = prefersReducedMotion
     ? { duration: 0.01 }
-    : { duration: 0.6, ease: [0.22, 1, 0.36, 1] as const };
+    : { duration: 0.62, ease: [0.22, 1, 0.36, 1] as const };
 
   return (
     <motion.div
-      animate={{ paddingTop: isOpen ? 132 : 14 }}
+      animate={{ paddingTop: isOpen ? 142 : 12 }}
       transition={springTransition}
       className={`relative select-none ${className}`}
       style={{ perspective: 1100 }}
     >
       {/* Envelope Body Wrapper (aspect 340:232 — classic European wedding envelope proportions) */}
       <div className="relative w-full aspect-[340/232]">
-        {/* 1. BACK POCKET & INTERIOR RECESS (z-10) */}
+        {/* 1. BACK POCKET & TEXTURED SLATE-BLUE INTERIOR (z-10) */}
         <svg
           viewBox="0 0 340 232"
           fill="none"
@@ -38,6 +38,10 @@ export function BlueGoldEnvelope({
               <stop offset="0%" stopColor="#8399AF" />
               <stop offset="100%" stopColor="#6D839B" />
             </linearGradient>
+            <pattern id="ceremonyLinerRib" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(35)">
+              <line x1="0" y1="0" x2="0" y2="10" stroke="#FAFBFD" strokeOpacity="0.065" strokeWidth="1" />
+              <line x1="5" y1="0" x2="5" y2="10" stroke="#3D5166" strokeOpacity="0.06" strokeWidth="0.8" />
+            </pattern>
           </defs>
           <rect
             x="2"
@@ -46,33 +50,38 @@ export function BlueGoldEnvelope({
             height="228"
             rx="8"
             fill="url(#ceremonyEnvBack)"
-            stroke="#7D93AA"
-            strokeOpacity="0.4"
-            strokeWidth="1"
+          />
+          <rect
+            x="2"
+            y="2"
+            width="336"
+            height="228"
+            rx="8"
+            fill="url(#ceremonyLinerRib)"
           />
         </svg>
 
-        {/* 2. WELCOME CARD TUCKED INSIDE (z-20) — matches Ceremony card double-border aesthetic */}
+        {/* 2. WELCOME CARD TUCKED INSIDE (z-20) — rises cleanly with zero crossing lines */}
         <motion.div
           initial={false}
           animate={
             isOpen
-              ? { y: -96, opacity: 1, scale: 1 }
-              : { y: 18, opacity: 0, scale: 0.94 }
+              ? { y: -112, opacity: 1, scale: 1 }
+              : { y: 16, opacity: 0, scale: 0.94 }
           }
           transition={
             prefersReducedMotion
               ? { duration: 0.01 }
               : {
-                  duration: 0.52,
+                  duration: 0.54,
                   delay: isOpen ? 0.14 : 0,
                   ease: [0.22, 1, 0.36, 1],
                 }
           }
           className="absolute inset-x-[7.5%] top-[8%] z-20 pointer-events-none"
         >
-          <div className="bg-[#FAFBFD] border border-[#7D93AA]/45 shadow-[0_10px_28px_rgba(61,81,102,0.14)] p-1.5 rounded-[2px]">
-            <div className="border border-[#CAA668]/60 px-4 py-3.5 text-center">
+          <div className="bg-[#FAFBFD] border border-[#7D93AA]/45 shadow-[0_12px_28px_rgba(61,81,102,0.16)] p-1.5 rounded-[2px]">
+            <div className="border border-[#CAA668]/65 px-4 py-3.5 text-center">
               <p className="font-script text-[24px] sm:text-[26px] text-[#7D93AA] leading-tight">
                 Queridos convidados,
               </p>
@@ -83,78 +92,107 @@ export function BlueGoldEnvelope({
           </div>
         </motion.div>
 
-        {/* 3. FRONT PORCELAIN & SLATE-MIST POCKET + SIDE FOLDS (z-30) */}
+        {/* 3. FRONT COTTON-TEXTURED POCKET & SIDE FOLDS (z-30, NO top horizontal border!) */}
         <svg
           viewBox="0 0 340 232"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
-          className="absolute inset-0 w-full h-full z-30 pointer-events-none drop-shadow-[0_14px_28px_rgba(61,81,102,0.13)]"
+          className="absolute inset-0 w-full h-full z-30 pointer-events-none drop-shadow-[0_14px_28px_rgba(61,81,102,0.14)]"
           aria-hidden="true"
         >
           <defs>
             <linearGradient id="ceremonySideLeft" x1="2" y1="16" x2="150" y2="132" gradientUnits="userSpaceOnUse">
               <stop offset="0%" stopColor="#EFF4F8" />
-              <stop offset="100%" stopColor="#E1E9F2" />
+              <stop offset="100%" stopColor="#E1E9F1" />
             </linearGradient>
             <linearGradient id="ceremonySideRight" x1="338" y1="16" x2="190" y2="132" gradientUnits="userSpaceOnUse">
               <stop offset="0%" stopColor="#EFF4F8" />
-              <stop offset="100%" stopColor="#E1E9F2" />
+              <stop offset="100%" stopColor="#E1E9F1" />
             </linearGradient>
             <linearGradient id="ceremonyFrontPocket" x1="170" y1="108" x2="170" y2="230" gradientUnits="userSpaceOnUse">
               <stop offset="0%" stopColor="#FAFBFD" />
               <stop offset="100%" stopColor="#EEF3F8" />
             </linearGradient>
+            {/* Fine cotton-linen weave texture for luxury stationery feel */}
+            <pattern id="cottonLinenWeave" width="16" height="16" patternUnits="userSpaceOnUse">
+              <path d="M0 4 H16 M0 12 H16" stroke="#7D93AA" strokeOpacity="0.055" strokeWidth="0.7" />
+              <path d="M4 0 V16 M12 0 V16" stroke="#7D93AA" strokeOpacity="0.045" strokeWidth="0.7" />
+              <path d="M0 8 H16 M8 0 V16" stroke="#FFFFFF" strokeOpacity="0.32" strokeWidth="0.6" />
+              <circle cx="3" cy="5" r="0.45" fill="#7D93AA" fillOpacity="0.09" />
+              <circle cx="11" cy="13" r="0.45" fill="#CAA668" fillOpacity="0.1" />
+              <circle cx="14" cy="3" r="0.35" fill="#7D93AA" fillOpacity="0.07" />
+            </pattern>
             <clipPath id="envBodyClip">
               <rect x="2" y="2" width="336" height="228" rx="8" />
             </clipPath>
           </defs>
 
           <g clipPath="url(#envBodyClip)">
-            {/* Soft slate-mist side folds for subtle tonal contrast */}
+            {/* Left & Right side folds with cotton texture */}
             <path
               d="M2 2 L152 124 L2 230 Z"
               fill="url(#ceremonySideLeft)"
               stroke="#7D93AA"
-              strokeOpacity="0.22"
+              strokeOpacity="0.24"
               strokeWidth="0.9"
             />
+            <path d="M2 2 L152 124 L2 230 Z" fill="url(#cottonLinenWeave)" />
+
             <path
               d="M338 2 L188 124 L338 230 Z"
               fill="url(#ceremonySideRight)"
               stroke="#7D93AA"
-              strokeOpacity="0.22"
+              strokeOpacity="0.24"
               strokeWidth="0.9"
             />
+            <path d="M338 2 L188 124 L338 230 Z" fill="url(#cottonLinenWeave)" />
 
-            {/* Curved lower pocket rising gently */}
+            {/* Soft pocket shadow over side folds */}
+            <path
+              d="M8 230 L138 119 C155 105, 185 105, 202 119 L332 230"
+              stroke="#3D5166"
+              strokeOpacity="0.08"
+              strokeWidth="4"
+              fill="none"
+            />
+
+            {/* Curved lower pocket */}
             <path
               d="M2 230 L138 116 C155 102, 185 102, 202 116 L338 230 Z"
               fill="url(#ceremonyFrontPocket)"
               stroke="#7D93AA"
-              strokeOpacity="0.28"
+              strokeOpacity="0.32"
               strokeWidth="1"
             />
+            <path
+              d="M2 230 L138 116 C155 102, 185 102, 202 116 L338 230 Z"
+              fill="url(#cottonLinenWeave)"
+            />
 
-            {/* Single delicate gold accent line echoing the V-pocket */}
+            {/* Delicate gold V-trim + subtle inner stitch accent */}
             <path
               d="M16 226 L142 122 C156 110, 184 110, 198 122 L324 226"
               stroke="#CAA668"
-              strokeOpacity="0.48"
-              strokeWidth="0.85"
+              strokeOpacity="0.52"
+              strokeWidth="0.9"
+              fill="none"
+            />
+            <path
+              d="M22 227 L144 126 C157 115, 183 115, 196 126 L318 227"
+              stroke="#7D93AA"
+              strokeOpacity="0.22"
+              strokeWidth="0.7"
+              strokeDasharray="2.5 2.5"
               fill="none"
             />
           </g>
 
-          {/* Outer refined frame matching Ceremony card border */}
-          <rect
-            x="2"
-            y="2"
-            width="336"
-            height="228"
-            rx="8"
+          {/* Outer border ONLY on left, bottom, and right (NO top edge line crossing open card!) */}
+          <path
+            d="M2 8 L2 222 C2 226.4 5.6 230 10 230 L330 230 C334.4 230 338 226.4 338 222 L338 8"
             fill="none"
             stroke="#7D93AA"
-            strokeOpacity="0.34"
+            strokeOpacity="0.36"
             strokeWidth="1.1"
           />
         </svg>
@@ -193,26 +231,41 @@ export function BlueGoldEnvelope({
                   <stop offset="0%" stopColor="#8CA2B8" />
                   <stop offset="100%" stopColor="#7D93AA" />
                 </linearGradient>
+                <pattern id="openFlapWeave" width="16" height="16" patternUnits="userSpaceOnUse">
+                  <path d="M0 4 H16 M0 12 H16" stroke="#7D93AA" strokeOpacity="0.055" strokeWidth="0.7" />
+                  <path d="M4 0 V16 M12 0 V16" stroke="#7D93AA" strokeOpacity="0.045" strokeWidth="0.7" />
+                </pattern>
+                <pattern id="openLinerRib" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(35)">
+                  <line x1="0" y1="0" x2="0" y2="10" stroke="#FAFBFD" strokeOpacity="0.075" strokeWidth="1" />
+                </pattern>
               </defs>
               {/* Ivory outer frame with rounded hinge corners */}
               <path
                 d="M2 140 C2 134, 4 130, 10 125 L146 15 C160 4, 180 4, 194 15 L330 125 C336 130, 338 134, 338 140 Z"
                 fill="#FAFBFD"
                 stroke="#7D93AA"
-                strokeOpacity="0.34"
+                strokeOpacity="0.36"
                 strokeWidth="1.1"
               />
-              {/* Dusty slate-blue (#7D93AA) liner */}
+              <path
+                d="M2 140 C2 134, 4 130, 10 125 L146 15 C160 4, 180 4, 194 15 L330 125 C336 130, 338 134, 338 140 Z"
+                fill="url(#openFlapWeave)"
+              />
+              {/* Dusty slate-blue (#7D93AA) textured liner */}
               <path
                 d="M15 140 L150 25 C161 15, 179 15, 190 25 L325 140 Z"
                 fill="url(#ceremonyOpenLiner)"
+              />
+              <path
+                d="M15 140 L150 25 C161 15, 179 15, 190 25 L325 140 Z"
+                fill="url(#openLinerRib)"
               />
               {/* Delicate gold hairline */}
               <path
                 d="M21 138 L152 28 C162 19, 178 19, 188 28 L319 138"
                 stroke="#CAA668"
-                strokeOpacity="0.65"
-                strokeWidth="0.9"
+                strokeOpacity="0.68"
+                strokeWidth="0.95"
                 fill="none"
               />
             </svg>
@@ -230,15 +283,22 @@ export function BlueGoldEnvelope({
               viewBox="0 0 340 140"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
-              className="w-full h-full pointer-events-none drop-shadow-[0_8px_14px_rgba(61,81,102,0.12)]"
+              className="w-full h-full pointer-events-none drop-shadow-[0_10px_16px_rgba(61,81,102,0.14)]"
               aria-hidden="true"
             >
               <defs>
                 <linearGradient id="ceremonyClosedFlap" x1="170" y1="0" x2="170" y2="136" gradientUnits="userSpaceOnUse">
                   <stop offset="0%" stopColor="#FAFBFD" />
-                  <stop offset="70%" stopColor="#F5F8FB" />
-                  <stop offset="100%" stopColor="#EDF2F7" />
+                  <stop offset="68%" stopColor="#F5F8FB" />
+                  <stop offset="100%" stopColor="#ECF1F7" />
                 </linearGradient>
+                <pattern id="closedFlapWeave" width="16" height="16" patternUnits="userSpaceOnUse">
+                  <path d="M0 4 H16 M0 12 H16" stroke="#7D93AA" strokeOpacity="0.055" strokeWidth="0.7" />
+                  <path d="M4 0 V16 M12 0 V16" stroke="#7D93AA" strokeOpacity="0.045" strokeWidth="0.7" />
+                  <path d="M0 8 H16 M8 0 V16" stroke="#FFFFFF" strokeOpacity="0.34" strokeWidth="0.6" />
+                  <circle cx="3" cy="5" r="0.45" fill="#7D93AA" fillOpacity="0.09" />
+                  <circle cx="11" cy="13" r="0.45" fill="#CAA668" fillOpacity="0.1" />
+                </pattern>
               </defs>
 
               {/* Softly curved silk-ivory top flap pointing gracefully down */}
@@ -246,22 +306,35 @@ export function BlueGoldEnvelope({
                 d="M2 8 C2 3.5, 5.5 0, 10 0 L330 0 C334.5 0, 338 3.5, 338 8 L338 11 C338 15, 335 18, 330 22 L194 126 C180 137, 160 137, 146 126 L10 22 C5 18, 2 15, 2 11 Z"
                 fill="url(#ceremonyClosedFlap)"
                 stroke="#7D93AA"
-                strokeOpacity="0.34"
+                strokeOpacity="0.36"
                 strokeWidth="1.05"
               />
+              {/* Tactile cotton-linen texture overlay on closed flap */}
+              <path
+                d="M2 8 C2 3.5, 5.5 0, 10 0 L330 0 C334.5 0, 338 3.5, 338 8 L338 11 C338 15, 335 18, 330 22 L194 126 C180 137, 160 137, 146 126 L10 22 C5 18, 2 15, 2 11 Z"
+                fill="url(#closedFlapWeave)"
+              />
 
-              {/* Delicate gold V-trim along the flap fold only (no harsh bar on top edge) */}
+              {/* Delicate gold V-trim + subtle dotted cotton stitch */}
               <path
                 d="M14 14 L150 119 C161 128, 179 128, 190 119 L326 14"
                 stroke="#CAA668"
-                strokeOpacity="0.6"
-                strokeWidth="0.9"
+                strokeOpacity="0.64"
+                strokeWidth="0.95"
                 strokeLinecap="round"
+                fill="none"
+              />
+              <path
+                d="M22 14 L153 115 C163 123, 177 123, 187 115 L318 14"
+                stroke="#7D93AA"
+                strokeOpacity="0.22"
+                strokeWidth="0.7"
+                strokeDasharray="2.5 2.5"
                 fill="none"
               />
             </svg>
 
-            {/* Subtle pulsing sculpted gold wax seal with harmonious calligraphic B & R */}
+            {/* Subtle pulsing sculpted gold wax seal with B & R crest matching Nossa Programação */}
             <motion.div
               animate={
                 !isOpen && !prefersReducedMotion
@@ -273,9 +346,9 @@ export function BlueGoldEnvelope({
                   ? { duration: 2.8, repeat: Infinity, ease: 'easeInOut' }
                   : { duration: 0.2 }
               }
-              className="absolute left-1/2 -bottom-[18px] -translate-x-1/2 w-[58px] h-[58px] pointer-events-none"
+              className="absolute left-1/2 -bottom-[21px] -translate-x-1/2 w-[64px] h-[64px] pointer-events-none"
             >
-              <svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full drop-shadow-[0_5px_10px_rgba(61,81,102,0.2)]">
+              <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full drop-shadow-[0_6px_12px_rgba(61,81,102,0.22)]">
                 <defs>
                   <radialGradient id="ceremonyGoldWax" cx="35%" cy="30%" r="70%">
                     <stop offset="0%" stopColor="#EAD1A1" />
@@ -284,41 +357,108 @@ export function BlueGoldEnvelope({
                   </radialGradient>
                   <radialGradient id="ceremonyGoldInner" cx="50%" cy="45%" r="55%">
                     <stop offset="0%" stopColor="#C8A364" />
-                    <stop offset="100%" stopColor="#B79251" />
+                    <stop offset="100%" stopColor="#B58E4D" />
                   </radialGradient>
+                  <linearGradient id="sealMonogramLight" x1="25" y1="26" x2="55" y2="54" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stopColor="#FFFFFF" />
+                    <stop offset="55%" stopColor="#FAFBFD" />
+                    <stop offset="100%" stopColor="#F1E1C2" />
+                  </linearGradient>
                 </defs>
                 {/* Organic sculpted wax seal silhouette */}
                 <path
-                  d="M36 4 C44 3, 52 7, 58 12 C64 17, 68 25, 68 34 C69 44, 65 53, 59 59 C53 65, 44 68, 36 68 C27 68, 18 65, 12 58 C6 52, 3 43, 4 33 C5 24, 9 15, 16 10 C22 5, 29 4, 36 4 Z"
+                  d="M40 4 C49 3, 58 7.5, 64.5 13 C71 18.5, 75.5 27.5, 75.5 37.5 C76.5 48.5, 72 58.5, 65.5 65.5 C59 72, 49 75.5, 40 75.5 C30 75.5, 20 72, 13.5 64.5 C7 57.5, 3.5 47.5, 4.5 36.5 C5.5 26.5, 10 16.5, 17.5 11 C24.5 5.5, 32 4, 40 4 Z"
                   fill="url(#ceremonyGoldWax)"
                   stroke="#9C783C"
                   strokeOpacity="0.65"
                   strokeWidth="0.9"
                 />
                 {/* Recessed inner medallion */}
-                <circle cx="36" cy="36" r="22.5" fill="url(#ceremonyGoldInner)" stroke="#F6E5C5" strokeOpacity="0.65" strokeWidth="1" />
-                <circle cx="36" cy="36" r="19.5" fill="none" stroke="#FAFBFD" strokeOpacity="0.38" strokeWidth="0.65" />
+                <circle cx="40" cy="40" r="25.5" fill="url(#ceremonyGoldInner)" stroke="#F6E5C5" strokeOpacity="0.7" strokeWidth="1" />
+                <circle cx="40" cy="40" r="22.5" fill="none" stroke="#FAFBFD" strokeOpacity="0.35" strokeWidth="0.65" />
 
-                {/* Harmonious slender italic B & R monogram */}
-                <g transform="translate(0 0.6)" opacity="0.28">
+                {/* Exact Nossa Programação B & R crest scaled into the seal */}
+                <g transform="translate(40 40)">
+                  {/* Symmetrical delicate laurel framing arcs */}
+                  <path
+                    d="M-19.5 1 C-18.8 -6.2, -12.4 -11.2, -4.5 -12 M19.5 1 C18.8 -6.2, 12.4 -11.2, 4.5 -12"
+                    stroke="url(#sealMonogramLight)"
+                    strokeWidth="0.75"
+                    strokeOpacity="0.78"
+                    strokeLinecap="round"
+                    fill="none"
+                  />
+                  <path
+                    d="M-16.8 6.5 C-13.2 11.2, -6.8 13.2, 0 13.2 C6.8 13.2, 13.2 11.2, 16.8 6.5"
+                    stroke="url(#sealMonogramLight)"
+                    strokeWidth="0.7"
+                    strokeOpacity="0.68"
+                    strokeLinecap="round"
+                    fill="none"
+                  />
+                  {/* Tiny center crest diamond */}
+                  <path d="M0 -13.5 L1.6 -11.9 L0 -10.3 L-1.6 -11.9 Z" fill="#FAFBFD" fillOpacity="0.82" />
+
+                  {/* Subtle embossed relief shadow */}
+                  <g transform="translate(0 0.7)" opacity="0.28">
+                    <text
+                      x="-9.5"
+                      y="4.2"
+                      textAnchor="middle"
+                      fill="#4A3818"
+                      fontSize="16"
+                      fontStyle="italic"
+                      fontWeight="500"
+                      fontFamily="Cormorant Garamond, Georgia, serif"
+                    >
+                      B
+                    </text>
+                    <text
+                      x="0"
+                      y="3.3"
+                      textAnchor="middle"
+                      fill="#4A3818"
+                      fontSize="10"
+                      fontStyle="italic"
+                      fontWeight="400"
+                      fontFamily="Cormorant Garamond, Georgia, serif"
+                    >
+                      &amp;
+                    </text>
+                    <text
+                      x="9.5"
+                      y="4.2"
+                      textAnchor="middle"
+                      fill="#4A3818"
+                      fontSize="16"
+                      fontStyle="italic"
+                      fontWeight="500"
+                      fontFamily="Cormorant Garamond, Georgia, serif"
+                    >
+                      R
+                    </text>
+                  </g>
+
+                  {/* B & R matching Nossa Programação */}
                   <text
-                    x="24.5"
-                    y="40.5"
+                    x="-9.5"
+                    y="4.2"
                     textAnchor="middle"
-                    fill="#4A3818"
-                    fontSize="15.5"
+                    fill="url(#sealMonogramLight)"
+                    fontSize="16"
                     fontStyle="italic"
-                    fontWeight="400"
+                    fontWeight="500"
                     fontFamily="Cormorant Garamond, Georgia, serif"
                   >
                     B
                   </text>
                   <text
-                    x="36"
-                    y="39.2"
+                    x="0"
+                    y="3.3"
                     textAnchor="middle"
-                    fill="#4A3818"
-                    fontSize="11"
+                    fill="url(#sealMonogramLight)"
+                    fillOpacity="0.94"
+                    fontSize="10"
                     fontStyle="italic"
                     fontWeight="400"
                     fontFamily="Cormorant Garamond, Georgia, serif"
@@ -326,54 +466,18 @@ export function BlueGoldEnvelope({
                     &amp;
                   </text>
                   <text
-                    x="47.5"
-                    y="40.5"
+                    x="9.5"
+                    y="4.2"
                     textAnchor="middle"
-                    fill="#4A3818"
-                    fontSize="15.5"
+                    fill="url(#sealMonogramLight)"
+                    fontSize="16"
                     fontStyle="italic"
-                    fontWeight="400"
+                    fontWeight="500"
                     fontFamily="Cormorant Garamond, Georgia, serif"
                   >
                     R
                   </text>
                 </g>
-                <text
-                  x="24.5"
-                  y="40.5"
-                  textAnchor="middle"
-                  fill="#FAFBFD"
-                  fontSize="15.5"
-                  fontStyle="italic"
-                  fontWeight="400"
-                  fontFamily="Cormorant Garamond, Georgia, serif"
-                >
-                  B
-                </text>
-                <text
-                  x="36"
-                  y="39.2"
-                  textAnchor="middle"
-                  fill="#F7E8CC"
-                  fontSize="11"
-                  fontStyle="italic"
-                  fontWeight="400"
-                  fontFamily="Cormorant Garamond, Georgia, serif"
-                >
-                  &amp;
-                </text>
-                <text
-                  x="47.5"
-                  y="40.5"
-                  textAnchor="middle"
-                  fill="#FAFBFD"
-                  fontSize="15.5"
-                  fontStyle="italic"
-                  fontWeight="400"
-                  fontFamily="Cormorant Garamond, Georgia, serif"
-                >
-                  R
-                </text>
               </svg>
             </motion.div>
           </div>
