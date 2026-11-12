@@ -124,9 +124,17 @@ export default function App() {
     audio.muted = false;
     setIsMuted(false);
     setMusicStarted(true);
-    void audio.play().catch(() => {
-      // Ignored if audio element is blocked
-    });
+    const playPromise = audio.play();
+    if (playPromise !== undefined) {
+      void playPromise.catch(() => {
+        const retryPlay = () => {
+          audio.muted = false;
+          void audio.play().catch(() => {});
+        };
+        audio.addEventListener('canplay', retryPlay, { once: true });
+        window.addEventListener('pointerdown', retryPlay, { once: true });
+      });
+    }
   };
 
   const toggleMusic = () => {
@@ -158,11 +166,13 @@ export default function App() {
         introDone ? 'min-h-screen' : 'h-screen overflow-hidden'
       }`}
     >
-      {/* Background wedding music (Vocaroo 1clXCbNQC5DZ + local MP3 fallback) */}
-      <audio ref={bgAudioRef} loop preload="auto">
-        <source src="https://media1.vocaroo.com/mp3/1clXCbNQC5DZ" type="audio/mpeg" />
-        <source src="/assets/invitation/background_music.mp3" type="audio/mpeg" />
-      </audio>
+      {/* Background wedding music served locally so Vercel/production never hits external 403 hotlink blocks */}
+      <audio
+        ref={bgAudioRef}
+        src="/assets/invitation/background_music.mp3"
+        loop
+        preload="auto"
+      />
 
       {!introDone && (
         <EnvelopeIntro
