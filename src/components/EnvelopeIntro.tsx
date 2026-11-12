@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'motion/react';
 
 interface EnvelopeIntroProps {
-  onPrepareAudio?: () => void;
   onStartOpen?: () => void;
   onComplete: () => void;
 }
@@ -19,7 +18,7 @@ function resolveImgurVideoUrl(url: string): string {
 
 const PRIMARY_VIDEO_URL = resolveImgurVideoUrl(IMGUR_SHARE_URL);
 
-export function EnvelopeIntro({ onPrepareAudio, onStartOpen, onComplete }: EnvelopeIntroProps) {
+export function EnvelopeIntro({ onStartOpen, onComplete }: EnvelopeIntroProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [status, setStatus] = useState<'idle' | 'playing' | 'fading'>('idle');
   const [videoReady, setVideoReady] = useState(false);
@@ -111,7 +110,6 @@ export function EnvelopeIntro({ onPrepareAudio, onStartOpen, onComplete }: Envel
         {status === 'idle' && (
           <button
             type="button"
-            onTouchStart={() => onPrepareAudio?.()}
             onClick={handleOpen}
             aria-label="Abrir convite de casamento"
             className="absolute inset-0 z-20 cursor-pointer focus-visible:outline-2 focus-visible:outline-inset focus-visible:outline-[#35271A]"

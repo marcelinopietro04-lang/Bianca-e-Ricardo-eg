@@ -77,6 +77,13 @@ export default function App() {
   const heroVideoRef = useRef<HTMLVideoElement | null>(null);
   const bgAudioRef = useRef<HTMLAudioElement | null>(null);
   const userMutedRef = useRef(false);
+  const activeEngineRef = useRef<'none' | 'html' | 'webaudio'>('none');
+  const audioArrayBufRef = useRef<ArrayBuffer | null>(null);
+  const audioFetchPromiseRef = useRef<Promise<ArrayBuffer | null> | null>(null);
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  const gainNodeRef = useRef<GainNode | null>(null);
+  const webAudioSourceRef = useRef<AudioBufferSourceNode | null>(null);
+  const fallbackTimerRef = useRef<number | null>(null);
   const [heroVideoReady, setHeroVideoReady] = useState(false);
   const [introDone, setIntroDone] = useState(false);
   const [musicStarted, setMusicStarted] = useState(false);
@@ -116,13 +123,32 @@ export default function App() {
     }
 
     const controller = new AbortController();
-    void fetch('/assets/invitation/background_music.mp3', {
+    const fetchPromise = fetch('/assets/invitation/background_music.mp3', {
       signal: controller.signal,
     })
       .then((res) => (res.ok ? res.arrayBuffer() : null))
+      .then((buf) => {
+        if (buf) {
+          audioArrayBufRef.current = buf;
+        }
+        return buf;
+      })
       .catch(() => null);
 
-    return () => controller.abort();
+    audioFetchPromiseRef.current = fetchPromise;
+
+    return () => {
+      controller.abort();
+      if (fallbackTimerRef.current !== null) {
+        window.clearTimeout(fallbackTimerRef.current);
+      }
+      try {
+        webAudioSourceRef.current?.stop();
+        void audioCtxRef.current?.close();
+      } catch {
+        // Ignore cleanup errors
+      }
+    };
   }, []);
 
   useEffect(() => {
@@ -138,18 +164,105 @@ export default function App() {
     }
   }, [introDone]);
 
+  const unlockWebAudioContext = (): AudioContext | null => {
+    try {
+      const Ctx =
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext?: typeof AudioContext })
+          .webkitAudioContext;
+      if (!Ctx) return null;
+
+      if (!audioCtxRef.current) {
+        audioCtxRef.current = new Ctx();
+      }
+      const ctx = audioCtxRef.current;
+      if (ctx.state === 'suspended') {
+        void ctx.resume();
+      }
+      // Play a silent 1-sample buffer synchronously inside the user gesture to unlock iOS Safari AudioContext
+      const buffer = ctx.createBuffer(1, 1, 22050);
+      const source = ctx.createBufferSource();
+      source.buffer = buffer;
+      source.connect(ctx.destination);
+      source.start(0);
+      return ctx;
+    } catch {
+      return null;
+    }
+  };
+
+  const startWebAudioFallback = async () => {
+    if (userMutedRef.current || activeEngineRef.current !== 'none') return;
+    const htmlAudio = bgAudioRef.current;
+    if (htmlAudio && !htmlAudio.paused && htmlAudio.currentTime > 0) {
+      activeEngineRef.current = 'html';
+      return;
+    }
+
+    const ctx = audioCtxRef.current ?? unlockWebAudioContext();
+    if (!ctx) return;
+
+    try {
+      if (ctx.state === 'suspended') {
+        await ctx.resume();
+      }
+      const rawBuf =
+        audioArrayBufRef.current ??
+        (audioFetchPromiseRef.current ? await audioFetchPromiseRef.current : null);
+      if (!rawBuf || userMutedRef.current || activeEngineRef.current !== 'none') {
+        return;
+      }
+
+      // Check one final time if HTMLAudio started playing while awaiting decode
+      if (htmlAudio && !htmlAudio.paused && htmlAudio.currentTime > 0) {
+        activeEngineRef.current = 'html';
+        return;
+      }
+
+      const decoded = await ctx.decodeAudioData(rawBuf.slice(0));
+      if (userMutedRef.current || activeEngineRef.current !== 'none') return;
+
+      if (htmlAudio) {
+        htmlAudio.pause();
+      }
+      activeEngineRef.current = 'webaudio';
+
+      const gain = ctx.createGain();
+      gain.gain.value = userMutedRef.current ? 0 : 0.65;
+      gain.connect(ctx.destination);
+      gainNodeRef.current = gain;
+
+      const source = ctx.createBufferSource();
+      source.buffer = decoded;
+      source.loop = true;
+      source.connect(gain);
+      source.start(0);
+      webAudioSourceRef.current = source;
+      setIsAudioPlaying(true);
+    } catch {
+      // Ignored; gesture retry or button remains available
+    }
+  };
+
   useEffect(() => {
     if (!musicStarted || isAudioPlaying) return;
 
     const unlockOnGesture = (event: Event) => {
       const target = event.target as Element | null;
       if (target?.closest('[data-music-toggle]')) return;
+      if (userMutedRef.current) return;
+
+      unlockWebAudioContext();
       const audio = bgAudioRef.current;
-      if (!audio || userMutedRef.current) return;
-      if (!audio.paused && !audio.muted) return;
-      audio.muted = false;
-      audio.volume = 0.65;
-      void audio.play().catch(() => {});
+      if (audio && activeEngineRef.current !== 'webaudio') {
+        audio.muted = false;
+        audio.volume = 0.65;
+        void audio.play().catch(() => {
+          void startWebAudioFallback();
+        });
+      } else if (activeEngineRef.current === 'none') {
+        void startWebAudioFallback();
+      }
     };
 
     window.addEventListener('touchend', unlockOnGesture, { capture: true, passive: true });
@@ -160,29 +273,66 @@ export default function App() {
     };
   }, [musicStarted, isAudioPlaying]);
 
-  const handlePrepareAudio = () => {
-    const audio = bgAudioRef.current;
-    if (!audio) return;
-    if (audio.readyState === 0) {
-      audio.load();
-    }
-  };
-
   const handleEnvelopeStartOpen = () => {
-    const audio = bgAudioRef.current;
-    if (!audio) return;
     userMutedRef.current = false;
-    audio.volume = 0.65;
-    audio.muted = false;
     setIsMuted(false);
     setMusicStarted(true);
-    void audio.play().catch(() => {
-      // Mobile browsers requiring a follow-up gesture are handled by touchend/click listener
-    });
+
+    // 1. Unlock Web Audio synchronously inside user gesture as mobile safety net
+    unlockWebAudioContext();
+
+    // 2. Start primary HTML5 <audio> synchronously inside user gesture
+    const audio = bgAudioRef.current;
+    if (audio) {
+      audio.volume = 0.65;
+      audio.muted = false;
+      void audio.play().catch(() => {
+        void startWebAudioFallback();
+      });
+    }
+
+    // 3. If HTML5 <audio> hasn't produced playback within 450ms on mobile, switch to pre-unlocked Web Audio
+    if (fallbackTimerRef.current !== null) {
+      window.clearTimeout(fallbackTimerRef.current);
+    }
+    fallbackTimerRef.current = window.setTimeout(() => {
+      const el = bgAudioRef.current;
+      if (
+        !userMutedRef.current &&
+        activeEngineRef.current === 'none' &&
+        (!el || el.paused || el.currentTime === 0)
+      ) {
+        void startWebAudioFallback();
+      }
+    }, 450);
   };
 
   const toggleMusic = () => {
     const audio = bgAudioRef.current;
+
+    if (activeEngineRef.current === 'webaudio') {
+      const ctx = audioCtxRef.current;
+      const gain = gainNodeRef.current;
+      if (isMuted) {
+        userMutedRef.current = false;
+        setIsMuted(false);
+        if (ctx && ctx.state === 'suspended') {
+          void ctx.resume();
+        }
+        if (gain) {
+          gain.gain.value = 0.65;
+        }
+        setIsAudioPlaying(true);
+      } else {
+        userMutedRef.current = true;
+        setIsMuted(true);
+        if (gain) {
+          gain.gain.value = 0;
+        }
+      }
+      return;
+    }
+
     if (!audio) return;
     if (isMuted || audio.paused) {
       userMutedRef.current = false;
@@ -190,7 +340,10 @@ export default function App() {
       audio.volume = 0.65;
       setIsMuted(false);
       setMusicStarted(true);
-      void audio.play().catch(() => {});
+      unlockWebAudioContext();
+      void audio.play().catch(() => {
+        void startWebAudioFallback();
+      });
     } else {
       userMutedRef.current = true;
       audio.muted = true;
@@ -219,14 +372,30 @@ export default function App() {
         src="/assets/invitation/background_music.mp3"
         loop
         preload="auto"
-        onPlay={() => setIsAudioPlaying(true)}
-        onPlaying={() => setIsAudioPlaying(true)}
-        onPause={() => setIsAudioPlaying(false)}
+        onPlay={() => {
+          if (activeEngineRef.current === 'webaudio') {
+            bgAudioRef.current?.pause();
+            return;
+          }
+          setIsAudioPlaying(true);
+        }}
+        onPlaying={() => {
+          if (activeEngineRef.current === 'webaudio') {
+            bgAudioRef.current?.pause();
+            return;
+          }
+          activeEngineRef.current = 'html';
+          setIsAudioPlaying(true);
+        }}
+        onPause={() => {
+          if (activeEngineRef.current !== 'webaudio') {
+            setIsAudioPlaying(false);
+          }
+        }}
       />
 
       {!introDone && (
         <EnvelopeIntro
-          onPrepareAudio={handlePrepareAudio}
           onStartOpen={handleEnvelopeStartOpen}
           onComplete={() => setIntroDone(true)}
         />
