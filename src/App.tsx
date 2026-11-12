@@ -76,10 +76,12 @@ export default function App() {
 
   const heroVideoRef = useRef<HTMLVideoElement | null>(null);
   const bgAudioRef = useRef<HTMLAudioElement | null>(null);
+  const userMutedRef = useRef(false);
   const [heroVideoReady, setHeroVideoReady] = useState(false);
   const [introDone, setIntroDone] = useState(false);
   const [musicStarted, setMusicStarted] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
+  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
   const [envelopeOpen, setEnvelopeOpen] = useState(false);
   const [activeScheduleTime, setActiveScheduleTime] = useState<string | null>(null);
   const [mapOpen, setMapOpen] = useState(false);
@@ -109,6 +111,8 @@ export default function App() {
   useEffect(() => {
     const video = heroVideoRef.current;
     if (!video) return;
+    video.defaultMuted = true;
+    video.muted = true;
     if (introDone) {
       video.currentTime = 0;
       void video.play().catch(() => {
@@ -117,35 +121,53 @@ export default function App() {
     }
   }, [introDone]);
 
+  useEffect(() => {
+    if (!musicStarted || isAudioPlaying) return;
+
+    const unlockOnGesture = (event: Event) => {
+      const target = event.target as Element | null;
+      if (target?.closest('[data-music-toggle]')) return;
+      const audio = bgAudioRef.current;
+      if (!audio || userMutedRef.current) return;
+      if (!audio.paused && !audio.muted) return;
+      audio.muted = false;
+      audio.volume = 0.65;
+      void audio.play().catch(() => {});
+    };
+
+    window.addEventListener('touchend', unlockOnGesture, { capture: true, passive: true });
+    window.addEventListener('click', unlockOnGesture, { capture: true });
+    return () => {
+      window.removeEventListener('touchend', unlockOnGesture, { capture: true });
+      window.removeEventListener('click', unlockOnGesture, { capture: true });
+    };
+  }, [musicStarted, isAudioPlaying]);
+
   const handleEnvelopeStartOpen = () => {
     const audio = bgAudioRef.current;
     if (!audio) return;
+    userMutedRef.current = false;
     audio.volume = 0.65;
     audio.muted = false;
     setIsMuted(false);
     setMusicStarted(true);
-    const playPromise = audio.play();
-    if (playPromise !== undefined) {
-      void playPromise.catch(() => {
-        const retryPlay = () => {
-          audio.muted = false;
-          void audio.play().catch(() => {});
-        };
-        audio.addEventListener('canplay', retryPlay, { once: true });
-        window.addEventListener('pointerdown', retryPlay, { once: true });
-      });
-    }
+    void audio.play().catch(() => {
+      // Mobile browsers requiring a follow-up gesture are handled by touchend/click listener
+    });
   };
 
   const toggleMusic = () => {
     const audio = bgAudioRef.current;
     if (!audio) return;
     if (isMuted || audio.paused) {
+      userMutedRef.current = false;
       audio.muted = false;
+      audio.volume = 0.65;
       setIsMuted(false);
       setMusicStarted(true);
       void audio.play().catch(() => {});
     } else {
+      userMutedRef.current = true;
       audio.muted = true;
       setIsMuted(true);
     }
@@ -172,6 +194,9 @@ export default function App() {
         src="/assets/invitation/background_music.mp3"
         loop
         preload="auto"
+        onPlay={() => setIsAudioPlaying(true)}
+        onPlaying={() => setIsAudioPlaying(true)}
+        onPause={() => setIsAudioPlaying(false)}
       />
 
       {!introDone && (
@@ -185,11 +210,20 @@ export default function App() {
       {introDone && musicStarted && (
         <button
           type="button"
+          data-music-toggle="true"
           onClick={toggleMusic}
-          aria-label={isMuted ? 'Ativar música de fundo' : 'Silenciar música de fundo'}
+          aria-label={
+            isMuted || !isAudioPlaying
+              ? 'Ativar música de fundo'
+              : 'Silenciar música de fundo'
+          }
           className="fixed bottom-4 right-4 z-40 w-11 h-11 rounded-full bg-[#7D93AA]/95 hover:bg-[#6E859D] text-white border border-[#CAA668] shadow-lg backdrop-blur-sm flex items-center justify-center transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7D93AA]"
         >
-          {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+          {isMuted || !isAudioPlaying ? (
+            <VolumeX className="w-4 h-4" />
+          ) : (
+            <Volume2 className="w-4 h-4" />
+          )}
         </button>
       )}
 

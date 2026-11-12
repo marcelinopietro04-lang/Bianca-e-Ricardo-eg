@@ -28,6 +28,13 @@ export function EnvelopeIntro({ onStartOpen, onComplete }: EnvelopeIntroProps) {
   };
 
   useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.defaultMuted = true;
+    video.muted = true;
+  }, []);
+
+  useEffect(() => {
     if (status !== 'fading') return;
     const timer = window.setTimeout(() => {
       onComplete();
@@ -47,6 +54,7 @@ export function EnvelopeIntro({ onStartOpen, onComplete }: EnvelopeIntroProps) {
 
     setStatus('playing');
     try {
+      video.defaultMuted = true;
       video.muted = true;
       video.currentTime = 0;
       await video.play();
@@ -86,6 +94,7 @@ export function EnvelopeIntro({ onStartOpen, onComplete }: EnvelopeIntroProps) {
         <video
           ref={videoRef}
           poster="/assets/invitation/envelope_poster.jpg"
+          muted
           playsInline
           preload="auto"
           onLoadedData={() => setVideoReady(true)}
