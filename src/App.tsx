@@ -109,6 +109,23 @@ export default function App() {
   }, [savedRsvp]);
 
   useEffect(() => {
+    const audio = bgAudioRef.current;
+    if (audio) {
+      audio.setAttribute('playsinline', '');
+      audio.setAttribute('webkit-playsinline', '');
+    }
+
+    const controller = new AbortController();
+    void fetch('/assets/invitation/background_music.mp3', {
+      signal: controller.signal,
+    })
+      .then((res) => (res.ok ? res.arrayBuffer() : null))
+      .catch(() => null);
+
+    return () => controller.abort();
+  }, []);
+
+  useEffect(() => {
     const video = heroVideoRef.current;
     if (!video) return;
     video.defaultMuted = true;
@@ -142,6 +159,14 @@ export default function App() {
       window.removeEventListener('click', unlockOnGesture, { capture: true });
     };
   }, [musicStarted, isAudioPlaying]);
+
+  const handlePrepareAudio = () => {
+    const audio = bgAudioRef.current;
+    if (!audio) return;
+    if (audio.readyState === 0) {
+      audio.load();
+    }
+  };
 
   const handleEnvelopeStartOpen = () => {
     const audio = bgAudioRef.current;
@@ -201,6 +226,7 @@ export default function App() {
 
       {!introDone && (
         <EnvelopeIntro
+          onPrepareAudio={handlePrepareAudio}
           onStartOpen={handleEnvelopeStartOpen}
           onComplete={() => setIntroDone(true)}
         />
@@ -217,7 +243,9 @@ export default function App() {
               ? 'Ativar música de fundo'
               : 'Silenciar música de fundo'
           }
-          className="fixed bottom-4 right-4 z-40 w-11 h-11 rounded-full bg-[#7D93AA]/95 hover:bg-[#6E859D] text-white border border-[#CAA668] shadow-lg backdrop-blur-sm flex items-center justify-center transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7D93AA]"
+          className={`fixed bottom-4 right-4 z-40 w-11 h-11 rounded-full bg-[#7D93AA]/95 hover:bg-[#6E859D] text-white border border-[#CAA668] shadow-lg backdrop-blur-sm flex items-center justify-center transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7D93AA] ${
+            !isMuted && !isAudioPlaying ? 'ring-4 ring-[#CAA668]/45 animate-pulse' : ''
+          }`}
         >
           {isMuted || !isAudioPlaying ? (
             <VolumeX className="w-4 h-4" />
@@ -247,11 +275,10 @@ export default function App() {
             <video
               ref={heroVideoRef}
               poster="/assets/invitation/hero_video_poster.jpg"
-              autoPlay
               loop
               muted
               playsInline
-              preload="auto"
+              preload={introDone ? 'auto' : 'metadata'}
               onLoadedData={() => setHeroVideoReady(true)}
               className="relative z-10 w-full h-full object-cover block"
             >

@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'motion/react';
 
 interface EnvelopeIntroProps {
+  onPrepareAudio?: () => void;
   onStartOpen?: () => void;
   onComplete: () => void;
 }
@@ -18,7 +19,7 @@ function resolveImgurVideoUrl(url: string): string {
 
 const PRIMARY_VIDEO_URL = resolveImgurVideoUrl(IMGUR_SHARE_URL);
 
-export function EnvelopeIntro({ onStartOpen, onComplete }: EnvelopeIntroProps) {
+export function EnvelopeIntro({ onPrepareAudio, onStartOpen, onComplete }: EnvelopeIntroProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [status, setStatus] = useState<'idle' | 'playing' | 'fading'>('idle');
   const [videoReady, setVideoReady] = useState(false);
@@ -102,14 +103,15 @@ export function EnvelopeIntro({ onStartOpen, onComplete }: EnvelopeIntroProps) {
           onEnded={triggerFadeOut}
           className="relative z-10 w-full h-full object-cover block"
         >
-          <source src={PRIMARY_VIDEO_URL} type="video/mp4" />
           <source src="/assets/invitation/envelope_h264.mp4" type="video/mp4" />
+          <source src={PRIMARY_VIDEO_URL} type="video/mp4" />
         </video>
 
         {/* Interactive Overlay While Envelope Is Closed */}
         {status === 'idle' && (
           <button
             type="button"
+            onTouchStart={() => onPrepareAudio?.()}
             onClick={handleOpen}
             aria-label="Abrir convite de casamento"
             className="absolute inset-0 z-20 cursor-pointer focus-visible:outline-2 focus-visible:outline-inset focus-visible:outline-[#35271A]"
