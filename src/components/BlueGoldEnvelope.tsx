@@ -691,50 +691,40 @@ export function BlueGoldRsvpEnvelope({ className = 'w-full h-auto' }: { classNam
         strokeWidth="1.2"
       />
 
-      {/* RSVP Card inside Envelope (#FAFBFD with #CAA668 gold border) */}
+      {/* Confirmation Card inside Envelope (#FAFBFD with #CAA668 gold border) */}
       <g filter="url(#rsvpShadow)">
         <rect x="44" y="54" width="212" height="164" rx="2" fill="#FAFBFD" stroke="#CAA668" strokeWidth="2.5" />
         <rect x="50" y="60" width="200" height="152" rx="1" fill="none" stroke="#CAA668" strokeWidth="0.7" strokeOpacity="0.65" />
 
         <text
           x="150"
-          y="96"
+          y="108"
           textAnchor="middle"
           fill="#4A6077"
-          fontSize="16"
+          fontSize="16.5"
           fontFamily="Cormorant Garamond, Georgia, serif"
           fontWeight="600"
-          letterSpacing="2"
+          letterSpacing="2.2"
         >
           CONFIRMAR
         </text>
         <text
           x="150"
-          y="116"
+          y="130"
           textAnchor="middle"
           fill="#4A6077"
-          fontSize="16"
+          fontSize="16.5"
           fontFamily="Cormorant Garamond, Georgia, serif"
           fontWeight="600"
-          letterSpacing="2"
+          letterSpacing="2.2"
         >
           PRESENÇA
         </text>
 
-        {/* RSVP Pill inside card */}
-        <rect x="106" y="132" width="88" height="28" rx="14" fill="#EEF2F6" stroke="#CAA668" strokeWidth="1.4" />
-        <text
-          x="150"
-          y="150"
-          textAnchor="middle"
-          fill="#4A6077"
-          fontSize="11.5"
-          fontFamily="Cormorant Garamond, Georgia, serif"
-          fontWeight="700"
-          letterSpacing="2.2"
-        >
-          RSVP
-        </text>
+        {/* Subtle gold crest ornament */}
+        <line x1="112" y1="147" x2="142" y2="147" stroke="#CAA668" strokeWidth="0.9" strokeOpacity="0.75" />
+        <path d="M150 143.5 L153.5 147 L150 150.5 L146.5 147 Z" fill="#CAA668" fillOpacity="0.85" />
+        <line x1="158" y1="147" x2="188" y2="147" stroke="#CAA668" strokeWidth="0.9" strokeOpacity="0.75" />
       </g>
 
       {/* Front Envelope Pocket (#7D93AA) */}

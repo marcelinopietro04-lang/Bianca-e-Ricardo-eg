@@ -5,7 +5,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
-import { CheckCircle2, Volume2, VolumeX } from 'lucide-react';
+import { MessageCircle, Volume2, VolumeX, WineOff } from 'lucide-react';
 import backgroundMusicUrl from './assets/background_music.mp3';
 import {
   BlueGoldEnvelope,
@@ -17,17 +17,13 @@ import { EnvelopeIntro } from './components/EnvelopeIntro';
 import {
   ChampagneFlutesIcon,
   ChurchIllustration,
-  GiftBoxIcon,
   PlateCutleryIcon,
   ScheduleChurchIcon,
-  WeddingCakeIcon,
 } from './components/WeddingIcons';
 import {
-  GiftsModal,
-  MapModal,
+  GARDEN_MAPS_URL,
   MoreInfoModal,
-  RsvpModal,
-  type RsvpSubmission,
+  RSVP_WHATSAPP_URL,
 } from './components/WeddingModals';
 
 interface ScheduleItem {
@@ -39,38 +35,24 @@ interface ScheduleItem {
 
 const SCHEDULE_ITEMS: ScheduleItem[] = [
   {
-    time: '15:00',
-    title: 'Cerimônia',
-    detail: 'Igreja Santa Luzia · Recomendamos chegar com 20 min de antecedência.',
+    time: '16:45',
+    title: 'Chegada dos Convidados',
+    detail: 'Garden Espaço · Horário indicado para chegada e acomodação tranquila.',
     icon: <ScheduleChurchIcon className="w-8 h-8 text-[#7D93AA]" />,
   },
   {
-    time: '16:00',
-    title: 'Coquetel',
-    detail: 'Brinde de boas-vindas no jardim com música acústica ao vivo.',
-    icon: <ChampagneFlutesIcon className="w-8 h-8 text-[#7D93AA]" />,
-  },
-  {
-    time: '18:00',
+    time: '18:30',
     title: 'Recepção',
-    detail: 'Abertura do salão principal e entrada dos noivos.',
-    icon: <PlateCutleryIcon className="w-8 h-8 text-[#7D93AA]" />,
+    detail: 'Abertura do salão principal, boas-vindas e entrada dos noivos.',
+    icon: <ChampagneFlutesIcon className="w-8 h-8 text-[#7D93AA]" />,
   },
   {
     time: '20:00',
     title: 'Jantar',
-    detail: 'Menu especial servido à francesa acompanhado de carta de vinhos.',
+    detail: 'Menu especial servido para celebrarmos juntos este momento.',
     icon: <PlateCutleryIcon className="w-8 h-8 text-[#7D93AA]" />,
   },
-  {
-    time: '22:00',
-    title: 'Festa',
-    detail: 'Corte do bolo, abertura da pista de dança e muita celebração.',
-    icon: <WeddingCakeIcon className="w-8 h-8 text-[#7D93AA]" />,
-  },
 ];
-
-const RSVP_STORAGE_KEY = 'bianca_ricardo_rsvp_v1';
 
 export default function App() {
   const prefersReducedMotion = useReducedMotion();
@@ -85,29 +67,7 @@ export default function App() {
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
   const [envelopeOpen, setEnvelopeOpen] = useState(false);
   const [activeScheduleTime, setActiveScheduleTime] = useState<string | null>(null);
-  const [mapOpen, setMapOpen] = useState(false);
-  const [rsvpOpen, setRsvpOpen] = useState(false);
-  const [giftsOpen, setGiftsOpen] = useState(false);
   const [infoOpen, setInfoOpen] = useState(false);
-
-  const [savedRsvp, setSavedRsvp] = useState<RsvpSubmission | null>(() => {
-    try {
-      const raw = window.localStorage.getItem(RSVP_STORAGE_KEY);
-      return raw ? (JSON.parse(raw) as RsvpSubmission) : null;
-    } catch {
-      return null;
-    }
-  });
-
-  useEffect(() => {
-    try {
-      if (savedRsvp) {
-        window.localStorage.setItem(RSVP_STORAGE_KEY, JSON.stringify(savedRsvp));
-      }
-    } catch {
-      // Ignore storage quota errors cleanly
-    }
-  }, [savedRsvp]);
 
   useEffect(() => {
     const audio = bgAudioRef.current;
@@ -339,19 +299,22 @@ export default function App() {
                   </h3>
 
                   <p className="mt-2 text-[15px] font-semibold text-[#3D5166] leading-snug">
-                    Igreja Santa Luzia
+                    Garden Espaço
                   </p>
                   <p className="text-[14px] text-[#5D738A] leading-snug">
-                    Rua das Flores, 123
+                    Setor Conjunto
+                    <br />
+                    Vera Cruz 2
                   </p>
 
-                  <button
-                    type="button"
-                    onClick={() => setMapOpen(true)}
-                    className="mt-4 min-h-[42px] px-7 py-1.5 rounded-full border border-[#CAA668] bg-[#FAFBFD] hover:bg-[#7D93AA] hover:text-white hover:border-[#7D93AA] text-[13px] tracking-[0.06em] text-[#4A6077] font-medium whitespace-nowrap transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7D93AA]"
+                  <a
+                    href={GARDEN_MAPS_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-4 min-h-[42px] px-7 py-1.5 rounded-full border border-[#CAA668] bg-[#FAFBFD] hover:bg-[#7D93AA] hover:text-white hover:border-[#7D93AA] text-[13px] tracking-[0.06em] text-[#4A6077] font-medium whitespace-nowrap inline-flex items-center justify-center transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7D93AA]"
                   >
                     Ver no Mapa
-                  </button>
+                  </a>
                 </div>
               </div>
 
@@ -425,65 +388,69 @@ export default function App() {
                     );
                   })}
                 </ul>
+
+                <div className="mt-6 pt-4 border-t border-[#CAA668]/40 flex items-start gap-3 text-left">
+                  <WineOff
+                    className="w-5 h-5 text-[#7D93AA] shrink-0 mt-0.5"
+                    aria-hidden="true"
+                  />
+                  <div>
+                    <p className="text-[11px] font-semibold tracking-[0.14em] uppercase text-[#3D5166]">
+                      Observação Importante
+                    </p>
+                    <p className="mt-0.5 text-[13.5px] leading-snug text-[#5D738A]">
+                      Para que todos aproveitem com leveza, não será permitido o consumo de bebidas alcoólicas no evento.
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </motion.section>
 
-          {/* 6. DICAS DE PRESENTES, RSVP ENVELOPE & LISTA DE PRESENTES */}
+          {/* 6. CONFIRMAÇÃO DE PRESENÇA (SOMENTE WHATSAPP) */}
           <motion.section
             {...fadeProps}
-            id="presentes"
+            id="rsvp"
             className="pt-4 pb-10 px-6 bg-[#EEF2F6] flex flex-col items-center text-center"
           >
             <h2 className="font-script text-[33px] sm:text-[36px] text-[#7D93AA] leading-tight">
-              Dicas de Presentes
+              Confirmação de Presença
             </h2>
 
-            <p className="mt-2 max-w-[260px] text-[16px] leading-[1.35] text-[#4E647B]">
-              Se preferir nos presentear, ficaremos muito felizes com sua contribuição.
+            <p className="mt-2 max-w-[270px] text-[16px] leading-[1.35] text-[#4E647B]">
+              Sua presença é o nosso maior presente. Confirme exclusivamente pelo nosso WhatsApp.
             </p>
 
-            {/* Interactive RSVP Envelope (#7D93AA & #CAA668) */}
-            <div id="rsvp" className="mt-6 w-full flex flex-col items-center">
-              <button
-                type="button"
-                onClick={() => setRsvpOpen(true)}
-                aria-label="Confirmar presença — abrir formulário RSVP"
-                className="relative w-[82%] max-w-[310px] group focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#7D93AA] rounded-xl transition-transform duration-200 hover:-translate-y-1 active:scale-[0.99]"
+            {/* Interactive RSVP Envelope linking directly to WhatsApp (#7D93AA & #CAA668) */}
+            <div className="mt-6 w-full flex flex-col items-center">
+              <a
+                href={RSVP_WHATSAPP_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Confirmar presença pelo WhatsApp (62) 99466-4485"
+                className="relative w-[82%] max-w-[310px] group focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#7D93AA] rounded-xl transition-transform duration-200 hover:-translate-y-1 active:scale-[0.99] block"
               >
                 <BlueGoldRsvpEnvelope className="w-full h-auto block drop-shadow-[0_12px_22px_rgba(61,81,102,0.16)]" />
-              </button>
-
-              {savedRsvp && (
-                <button
-                  type="button"
-                  onClick={() => setRsvpOpen(true)}
-                  className="mt-2 inline-flex items-center gap-1.5 text-xs tracking-wide text-[#4E647B] hover:text-[#3D5166] underline underline-offset-4 min-h-[36px]"
-                >
-                  <CheckCircle2 className="w-3.5 h-3.5 text-[#CAA668]" />
-                  <span>
-                    Confirmado por {savedRsvp.name} · Editar resposta
-                  </span>
-                </button>
-              )}
+              </a>
             </div>
 
-            {/* Interactive Lista de Presentes Card Button */}
-            <button
-              type="button"
-              onClick={() => setGiftsOpen(true)}
-              className="mt-6 w-[84%] max-w-[305px] min-h-[58px] bg-[#FAFBFD] hover:bg-white border border-[#CAA668]/80 rounded-xl px-4 py-3 shadow-sm flex items-center gap-3.5 text-left transition-all duration-150 hover:-translate-y-0.5 active:scale-[0.99] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7D93AA]"
+            {/* Direct WhatsApp Confirmation Card */}
+            <a
+              href={RSVP_WHATSAPP_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-5 w-[84%] max-w-[305px] min-h-[56px] bg-[#FAFBFD] hover:bg-white border border-[#CAA668]/80 rounded-xl px-4 py-3 shadow-sm flex items-center gap-3.5 text-left transition-all duration-150 hover:-translate-y-0.5 active:scale-[0.99] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7D93AA]"
             >
-              <GiftBoxIcon className="w-8 h-8 text-[#7D93AA] shrink-0" />
+              <MessageCircle className="w-7 h-7 text-[#7D93AA] shrink-0" />
               <div className="min-w-0">
-                <p className="text-[12px] font-semibold tracking-[0.09em] uppercase text-[#3D5166] leading-tight">
-                  LISTA DE PRESENTES
+                <p className="text-[11px] font-semibold tracking-[0.09em] uppercase text-[#3D5166] leading-tight">
+                  CONFIRMAR PELO WHATSAPP
                 </p>
-                <p className="mt-0.5 text-[12px] text-[#5D738A] leading-snug">
-                  Clique aqui para acessar nossa lista de presentes
+                <p className="mt-0.5 text-[14px] font-medium text-[#5D738A] leading-snug tabular-nums">
+                  (62) 99466-4485
                 </p>
               </div>
-            </button>
+            </a>
           </motion.section>
 
           {/* 7. SLATE BLUE & GOLD FOOTER BAR */}
@@ -504,15 +471,7 @@ export default function App() {
         </article>
       </main>
 
-      {/* Modals */}
-      <MapModal isOpen={mapOpen} onClose={() => setMapOpen(false)} />
-      <RsvpModal
-        isOpen={rsvpOpen}
-        onClose={() => setRsvpOpen(false)}
-        savedRsvp={savedRsvp}
-        onSaveRsvp={setSavedRsvp}
-      />
-      <GiftsModal isOpen={giftsOpen} onClose={() => setGiftsOpen(false)} />
+      {/* Modal */}
       <MoreInfoModal isOpen={infoOpen} onClose={() => setInfoOpen(false)} />
     </div>
   );

@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 
 const SAO_PAULO_TIMEZONE = 'America/Sao_Paulo';
-// Target: 20 de Março de 2027 às 15:00 no horário de São Paulo
-const TARGET_SP_WALL_MS = Date.UTC(2027, 2, 20, 15, 0, 0);
+// Target: 20 de Março de 2027 às 16:45 no horário de São Paulo
+const TARGET_SP_WALL_MS = Date.UTC(2027, 2, 20, 16, 45, 0);
 
 const saoPauloFormatter = new Intl.DateTimeFormat('en-US', {
   timeZone: SAO_PAULO_TIMEZONE,
